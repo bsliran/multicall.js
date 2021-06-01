@@ -3,6 +3,8 @@ import aggregate from './aggregate';
 import { isEmpty } from './helpers';
 import addresses from './addresses.json';
 import debug from 'debug';
+import safeStringify from 'fast-safe-stringify';
+
 const log = debug('multicall');
 
 const reWsEndpoint = /^wss?:\/\//i;
@@ -87,12 +89,12 @@ export default function createWatcher(model, config) {
         }
       };
       state.ws.onclose = err => {
-        log('WebSocket closed: %s', JSON.stringify(err));
+        log('WebSocket closed: %s', safeStringify(err));
         log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
         reconnectWebSocket(state.config.wsReconnectTimeout);
       };
       state.ws.onerror = err => {
-        log('WebSocket error: %s', JSON.stringify(err));
+        log('WebSocket error: %s', safeStringify(err));
         log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
         reconnectWebSocket(state.config.wsReconnectTimeout);
       };
