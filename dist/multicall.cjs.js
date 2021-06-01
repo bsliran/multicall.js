@@ -104,6 +104,11 @@ async function ethCall(rawData, _ref) {
   }
 }
 
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var INSIDE_EVERY_PARENTHESES = /\(.*?\)/g;
 var FIRST_CLOSING_PARENTHESES = /^[^)]*\)/;
 function _makeMulticallData(calls) {
@@ -144,19 +149,8 @@ async function aggregate(calls, config) {
     var args = call.slice(1);
 
     if (args.length > 0) {
-      for (var _iterator = returns, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-        var _ref3;
-
-        if (_isArray) {
-          if (_i >= _iterator.length) break;
-          _ref3 = _iterator[_i++];
-        } else {
-          _i = _iterator.next();
-          if (_i.done) break;
-          _ref3 = _i.value;
-        }
-
-        var returnMeta = _ref3;
+      for (var _iterator = _createForOfIteratorHelperLoose(returns), _step; !(_step = _iterator()).done;) {
+        var returnMeta = _step.value;
         var key = returnMeta[0];
         acc[key] = args;
       }
@@ -164,10 +158,10 @@ async function aggregate(calls, config) {
 
     return acc;
   }, {});
-  calls = calls.map(function (_ref4) {
-    var call = _ref4.call,
-        target = _ref4.target,
-        returns = _ref4.returns;
+  calls = calls.map(function (_ref3) {
+    var call = _ref3.call,
+        target = _ref3.target,
+        returns = _ref3.returns;
     if (!target) target = config.multicallAddress;
     var method = call[0],
         argValues = call.slice(1);
@@ -196,14 +190,14 @@ async function aggregate(calls, config) {
   });
   var callDataBytes = makeMulticallData(calls, false);
   var outerResults = await ethCall(callDataBytes, config);
-  var returnTypeArray = calls.map(function (_ref5) {
-    var returnTypes = _ref5.returnTypes;
+  var returnTypeArray = calls.map(function (_ref4) {
+    var returnTypes = _ref4.returnTypes;
     return returnTypes;
   }).reduce(function (acc, ele) {
     return acc.concat(ele);
   }, []);
-  var returnDataMeta = calls.map(function (_ref6) {
-    var returns = _ref6.returns;
+  var returnDataMeta = calls.map(function (_ref5) {
+    var returns = _ref5.returns;
     return returns;
   }).reduce(function (acc, ele) {
     return acc.concat(ele);
@@ -427,15 +421,15 @@ function createWatcher(model, config) {
           } : {}));
         });
 
-        var _ref4 = await aggregate(_this.state.model, _extends({}, _this.state.config, {
+        var _await$aggregate = await aggregate(_this.state.model, _extends({}, _this.state.config, {
           ws: _this.state.ws,
           id: _this.state.latestPromiseId
         })),
-            _ref4$results = _ref4.results,
-            blockNumber = _ref4$results.blockNumber,
-            data = _extends({}, _ref4$results.original),
-            dataTransformed = _extends({}, _ref4$results.transformed),
-            keyToArgMap = _ref4.keyToArgMap;
+            _await$aggregate$resu = _await$aggregate.results,
+            blockNumber = _await$aggregate$resu.blockNumber,
+            data = _extends({}, _await$aggregate$resu.original),
+            dataTransformed = _extends({}, _await$aggregate$resu.transformed),
+            keyToArgMap = _await$aggregate.keyToArgMap;
 
         if (_this.state.cancelPromiseId === promiseId) return;
         if (typeof _this.resolveFetchPromise === 'function') _this.resolveFetchPromise();
@@ -452,18 +446,18 @@ function createWatcher(model, config) {
         } else {
           if (_this.state.latestBlockNumber === null || _this.state.latestBlockNumber !== null && blockNumber > _this.state.latestBlockNumber) {
             _this.state.latestBlockNumber = parseInt(blockNumber);
-            state.listeners.block.forEach(function (_ref5) {
-              var listener = _ref5.listener;
+            state.listeners.block.forEach(function (_ref4) {
+              var listener = _ref4.listener;
               return listener(_this.state.latestBlockNumber);
             });
           }
 
-          var events = Object.entries(data).filter(function (_ref6) {
-            var type = _ref6[0],
-                value = _ref6[1];
+          var events = Object.entries(data).filter(function (_ref5) {
+            var type = _ref5[0],
+                value = _ref5[1];
             return isNewState(type, value, _this.state.store);
-          }).map(function (_ref7) {
-            var type = _ref7[0];
+          }).map(function (_ref6) {
+            var type = _ref6[0];
             return {
               type: type,
               value: dataTransformed[type],
@@ -481,8 +475,8 @@ function createWatcher(model, config) {
         }
       } catch (err) {
         log$1('Error: %s', err.message);
-        state.listeners.error.forEach(function (_ref8) {
-          var listener = _ref8.listener;
+        state.listeners.error.forEach(function (_ref7) {
+          var listener = _ref7.listener;
           return listener(err, _this.state);
         });
         if (!_this.state.handler) return; // Retry on error
@@ -534,8 +528,8 @@ function createWatcher(model, config) {
 
       return {
         unsub: function unsub() {
-          state.listeners.subscribe = state.listeners.subscribe.filter(function (_ref9) {
-            var _id = _ref9.id;
+          state.listeners.subscribe = state.listeners.subscribe.filter(function (_ref8) {
+            var _id = _ref8.id;
             return _id !== id;
           });
         }
@@ -550,8 +544,8 @@ function createWatcher(model, config) {
 
           return {
             unsub: function unsub() {
-              state.listeners.subscribe = state.listeners.subscribe.filter(function (_ref10) {
-                var _id = _ref10.id;
+              state.listeners.subscribe = state.listeners.subscribe.filter(function (_ref9) {
+                var _id = _ref9.id;
                 return _id !== id;
               });
             }
@@ -568,8 +562,8 @@ function createWatcher(model, config) {
       });
       return {
         unsub: function unsub() {
-          state.listeners.block = state.listeners.block.filter(function (_ref11) {
-            var _id = _ref11.id;
+          state.listeners.block = state.listeners.block.filter(function (_ref10) {
+            var _id = _ref10.id;
             return _id !== id;
           });
         }
@@ -583,8 +577,8 @@ function createWatcher(model, config) {
       });
       return {
         unsub: function unsub() {
-          state.listeners.poll = state.listeners.poll.filter(function (_ref12) {
-            var _id = _ref12.id;
+          state.listeners.poll = state.listeners.poll.filter(function (_ref11) {
+            var _id = _ref11.id;
             return _id !== id;
           });
         }
@@ -598,8 +592,8 @@ function createWatcher(model, config) {
       });
       return {
         unsub: function unsub() {
-          state.listeners.error = state.listeners.error.filter(function (_ref13) {
-            var _id = _ref13.id;
+          state.listeners.error = state.listeners.error.filter(function (_ref12) {
+            var _id = _ref12.id;
             return _id !== id;
           });
         }
